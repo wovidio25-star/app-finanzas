@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Financiero</title>
+    <!-- Tailwind CSS para diseño rápido y moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Enlaces para la PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="icon.png">
+</head>
+<body class="bg-gray-100 p-4 font-sans">
+
+    <!-- Contenedor Principal -->
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6 mt-4">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Registro de Gastos</h1>
+        
+        <form id="formularioGastos" class="space-y-4">
+            
+            <!-- Fecha -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Fecha</label>
+                <input type="date" id="fecha" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <!-- Monto -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Monto (Bs)</label>
+                <input type="number" step="0.1" id="monto" placeholder="Ej: 15.50" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <!-- Categoría -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Categoría</label>
+                <select id="categoria" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Selecciona...</option>
+                    <option value="Fijo">Gasto Fijo</option>
+                    <option value="Variable">Gasto Variable</option>
+                    <option value="Imprevisto">Imprevisto</option>
+                    <option value="Ahorro/Destino">Ahorro / Ayuda</option>
+                </select>
+            </div>
+
+            <!-- Subcategoría -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Subcategoría</label>
+                <input type="text" id="subcategoria" placeholder="Ej: Pasajes, Gym, Almuerzo" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <!-- Cuenta Origen -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Cuenta de Origen</label>
+                <select id="cuenta" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                    <option value="BNB">BNB</option>
+                    <option value="BMSC">BMSC</option>
+                    <option value="Billetera">Billetera (Efectivo)</option>
+                </select>
+            </div>
+
+            <!-- Notas -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Notas (Opcional)</label>
+                <input type="text" id="notas" placeholder="Ej: Regalo para mis papás" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <!-- Botón Guardar -->
+            <button type="submit" id="btnGuardar" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-300 mt-4">
+                Guardar Gasto
+            </button>
+            
+            <!-- Mensaje de Estado -->
+            <p id="mensajeEstado" class="text-center text-sm font-semibold mt-2 hidden"></p>
+
+        </form>
+    </div>
+
+    <!-- Lógica de JavaScript -->
+    <script>
+        // Configurar la fecha actual por defecto
+        document.getElementById('fecha').valueAsDate = new Date();
+
+        document.getElementById('formularioGastos').addEventListener('submit', function(e) {
+            e.preventDefault(); // Evita que la página se recargue
+
+            // UI Updates
+            const btn = document.getElementById('btnGuardar');
+            const msg = document.getElementById('mensajeEstado');
+            btn.innerText = "Guardando...";
+            btn.disabled = true;
+            msg.classList.add("hidden");
+
+            // Reemplaza esto con tu URL de Google Apps Script
+            const urlApi = "https://script.google.com/macros/s/AKfycbz473eKT8UghEfzOLjh6DTTZ8BIruXNwkBsyCv-YB7jVceXkvrpwWBSLGT9mWdskQyIww/exec"; 
+
+            // Recopilar los datos del formulario
+            const datos = {
+                accion: "nuevo_gasto",
+                id: Date.now(), // Genera un ID único con la fecha y hora
+                fecha: document.getElementById('fecha').value,
+                monto: document.getElementById('monto').value,
+                categoria: document.getElementById('categoria').value,
+                subcategoria: document.getElementById('subcategoria').value,
+                cuenta: document.getElementById('cuenta').value,
+                notas: document.getElementById('notas').value
+            };
+
+            // Enviar datos al Google Sheet (Fetch API)
+            fetch(urlApi, {
+                method: "POST",
+                mode: "no-cors", // Requerido para evitar bloqueos de seguridad de Google
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(() => {
+                // Como usamos no-cors, asumimos éxito si no hay error de red
+                msg.innerText = "¡Gasto registrado con éxito!";
+                msg.className = "text-center text-sm font-semibold mt-2 text-green-600 block";
+                document.getElementById('formularioGastos').reset(); // Limpiar formulario
+                document.getElementById('fecha').valueAsDate = new Date(); // Reponer fecha
+            })
+            .catch((error) => {
+                msg.innerText = "Error de conexión. Intenta de nuevo.";
+                msg.className = "text-center text-sm font-semibold mt-2 text-red-600 block";
+            })
+            .finally(() => {
+                btn.innerText = "Guardar Gasto";
+                btn.disabled = false;
+            });
+        });
+
+        // Registrar el Service Worker para la PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('Service Worker registrado con éxito'))
+                    .catch(err => console.log('Error al registrar Service Worker', err));
+            });
+        }
+    </script>
+</body>
+</html>
