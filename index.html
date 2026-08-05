@@ -4,38 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control Financiero</title>
-    <!-- Tailwind CSS para diseño rápido y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Enlaces para la PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2563eb">
     <link rel="apple-touch-icon" href="icon.png">
+    
+    <!-- Íconos de Google -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    
+    <style>
+        /* Ocultar barra de desplazamiento para un look más nativo */
+        body { -ms-overflow-style: none; scrollbar-width: none; }
+        body::-webkit-scrollbar { display: none; }
+    </style>
 </head>
-<body class="bg-gray-100 p-4 font-sans">
+<body class="bg-gray-100 font-sans pb-20"> <!-- pb-20 deja espacio para el menú inferior -->
 
-    <!-- Contenedor Principal -->
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6 mt-4">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Registro de Gastos</h1>
-        
+    <!-- ==================== SECCIÓN 1: GASTOS ==================== -->
+    <div id="seccion-gastos" class="seccion-app max-w-md mx-auto bg-white rounded-b-xl shadow-sm overflow-hidden md:max-w-2xl p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Registrar Gasto</h1>
         <form id="formularioGastos" class="space-y-4">
-            
-            <!-- Fecha -->
             <div>
                 <label class="block text-sm font-medium text-gray-700">Fecha</label>
-                <input type="date" id="fecha" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                <input type="date" id="g-fecha" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
             </div>
-
-            <!-- Monto -->
             <div>
                 <label class="block text-sm font-medium text-gray-700">Monto (Bs)</label>
-                <input type="number" step="0.1" id="monto" placeholder="Ej: 15.50" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                <input type="number" step="0.1" id="g-monto" placeholder="Ej: 15.50" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
             </div>
-
-            <!-- Categoría -->
             <div>
                 <label class="block text-sm font-medium text-gray-700">Categoría</label>
-                <select id="categoria" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                <select id="g-categoria" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Selecciona...</option>
                     <option value="Fijo">Gasto Fijo</option>
                     <option value="Variable">Gasto Variable</option>
@@ -43,102 +42,202 @@
                     <option value="Ahorro/Destino">Ahorro / Ayuda</option>
                 </select>
             </div>
-
-            <!-- Subcategoría -->
             <div>
                 <label class="block text-sm font-medium text-gray-700">Subcategoría</label>
-                <input type="text" id="subcategoria" placeholder="Ej: Pasajes, Gym, Almuerzo" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                <input type="text" id="g-subcategoria" placeholder="Ej: Pasajes, Gym, Almuerzo" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
             </div>
-
-            <!-- Cuenta Origen -->
             <div>
                 <label class="block text-sm font-medium text-gray-700">Cuenta de Origen</label>
-                <select id="cuenta" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                <select id="g-cuenta" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
                     <option value="BNB">BNB</option>
                     <option value="BMSC">BMSC</option>
                     <option value="Billetera">Billetera (Efectivo)</option>
                 </select>
             </div>
-
-            <!-- Notas -->
             <div>
                 <label class="block text-sm font-medium text-gray-700">Notas (Opcional)</label>
-                <input type="text" id="notas" placeholder="Ej: Regalo para mis papás" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                <input type="text" id="g-notas" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
             </div>
-
-            <!-- Botón Guardar -->
-            <button type="submit" id="btnGuardar" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-300 mt-4">
+            <button type="submit" id="btnGuardarGasto" class="w-full bg-red-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-600 transition shadow-md mt-4">
                 Guardar Gasto
             </button>
-            
-            <!-- Mensaje de Estado -->
-            <p id="mensajeEstado" class="text-center text-sm font-semibold mt-2 hidden"></p>
-
+            <p id="msgGastos" class="text-center text-sm font-semibold mt-2 hidden"></p>
         </form>
     </div>
 
-    <!-- Lógica de JavaScript -->
+    <!-- ==================== SECCIÓN 2: SUELDOS ==================== -->
+    <div id="seccion-sueldos" class="seccion-app hidden max-w-md mx-auto bg-white rounded-b-xl shadow-sm overflow-hidden md:max-w-2xl p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Ingreso de Sueldo</h1>
+        <form id="formularioSueldos" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Mes a cobrar (Mes devengado)</label>
+                <input type="month" id="s-mes" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-green-500 focus:border-green-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Fecha de Pago</label>
+                <input type="date" id="s-fecha" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-green-500 focus:border-green-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Monto Recibido (Bs)</label>
+                <input type="number" step="0.01" id="s-monto" placeholder="Ej: 1675.53" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-green-500 focus:border-green-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Porcentaje del mes (%)</label>
+                <input type="number" step="0.01" id="s-porcentaje" placeholder="Ej: 50 o 42.58" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-green-500 focus:border-green-500">
+            </div>
+            <button type="submit" id="btnGuardarSueldo" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition shadow-md mt-4">
+                Registrar Sueldo
+            </button>
+            <p id="msgSueldos" class="text-center text-sm font-semibold mt-2 hidden"></p>
+        </form>
+    </div>
+
+    <!-- ==================== SECCIÓN 3: RESUMEN ==================== -->
+    <div id="seccion-resumen" class="seccion-app hidden max-w-md mx-auto p-4 space-y-4">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center mt-2">Mi Patrimonio</h1>
+        
+        <!-- Tarjeta de Saldos -->
+        <div class="bg-blue-600 text-white rounded-xl shadow-lg p-5">
+            <h2 class="text-sm uppercase tracking-wider font-semibold opacity-80">Saldo Total Estimado</h2>
+            <p class="text-3xl font-bold mt-1 mb-4">Cargando...</p>
+            
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <span class="opacity-80">BNB</span>
+                    <p class="font-bold text-lg">-- Bs</p>
+                </div>
+                <div>
+                    <span class="opacity-80">BMSC</span>
+                    <p class="font-bold text-lg">-- Bs</p>
+                </div>
+                <div>
+                    <span class="opacity-80">Efectivo</span>
+                    <p class="font-bold text-lg">-- Bs</p>
+                </div>
+                <div>
+                    <span class="opacity-80">Binance / USD</span>
+                    <p class="font-bold text-lg">--</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-sm p-5 text-center">
+            <span class="material-symbols-outlined text-gray-400 text-4xl mb-2">sync</span>
+            <p class="text-gray-500 text-sm">Pronto conectaremos esta pantalla con tu base de datos para leer tus saldos en tiempo real.</p>
+        </div>
+    </div>
+
+    <!-- ==================== MENÚ INFERIOR (TABS) ==================== -->
+    <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around p-2 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <button onclick="cambiarSeccion('gastos', this)" class="tab-btn flex flex-col items-center p-2 text-blue-600 w-1/3">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <span class="text-xs font-semibold mt-1">Gastos</span>
+        </button>
+        <button onclick="cambiarSeccion('sueldos', this)" class="tab-btn flex flex-col items-center p-2 text-gray-400 hover:text-blue-600 w-1/3">
+            <span class="material-symbols-outlined">payments</span>
+            <span class="text-xs font-semibold mt-1">Sueldos</span>
+        </button>
+        <button onclick="cambiarSeccion('resumen', this)" class="tab-btn flex flex-col items-center p-2 text-gray-400 hover:text-blue-600 w-1/3">
+            <span class="material-symbols-outlined">account_balance_wallet</span>
+            <span class="text-xs font-semibold mt-1">Resumen</span>
+        </button>
+    </div>
+
+    <!-- ==================== LÓGICA JAVASCRIPT ==================== -->
     <script>
-        // Configurar la fecha actual por defecto
-        document.getElementById('fecha').valueAsDate = new Date();
+        // --- 1. CONFIGURACIÓN ---
+        const urlApi = "https://script.google.com/macros/s/AKfycbz473eKT8UghEfzOLjh6DTTZ8BIruXNwkBsyCv-YB7jVceXkvrpwWBSLGT9mWdskQyIww/exec"; // ¡PEGAR URL AQUÍ!
 
+        // --- 2. NAVEGACIÓN (TABS) ---
+        function cambiarSeccion(seccionActiva, botonClickeado) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.seccion-app').forEach(el => el.classList.add('hidden'));
+            // Mostrar la seleccionada
+            document.getElementById('seccion-' + seccionActiva).classList.remove('hidden');
+            
+            // Reiniciar colores de los botones
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-blue-600');
+                btn.classList.add('text-gray-400');
+            });
+            // Pintar el botón activo
+            botonClickeado.classList.remove('text-gray-400');
+            botonClickeado.classList.add('text-blue-600');
+        }
+
+        // Configurar fechas actuales por defecto al cargar
+        document.getElementById('g-fecha').valueAsDate = new Date();
+        document.getElementById('s-fecha').valueAsDate = new Date();
+        
+        // --- 3. ENVÍO DE GASTOS ---
         document.getElementById('formularioGastos').addEventListener('submit', function(e) {
-            e.preventDefault(); // Evita que la página se recargue
+            e.preventDefault();
+            const btn = document.getElementById('btnGuardarGasto');
+            const msg = document.getElementById('msgGastos');
+            btn.innerText = "Guardando..."; btn.disabled = true; msg.classList.add("hidden");
 
-            // UI Updates
-            const btn = document.getElementById('btnGuardar');
-            const msg = document.getElementById('mensajeEstado');
-            btn.innerText = "Guardando...";
-            btn.disabled = true;
-            msg.classList.add("hidden");
-
-            // Reemplaza esto con tu URL de Google Apps Script
-            const urlApi = "https://script.google.com/macros/s/AKfycbz473eKT8UghEfzOLjh6DTTZ8BIruXNwkBsyCv-YB7jVceXkvrpwWBSLGT9mWdskQyIww/exec"; 
-
-            // Recopilar los datos del formulario
             const datos = {
                 accion: "nuevo_gasto",
-                id: Date.now(), // Genera un ID único con la fecha y hora
-                fecha: document.getElementById('fecha').value,
-                monto: document.getElementById('monto').value,
-                categoria: document.getElementById('categoria').value,
-                subcategoria: document.getElementById('subcategoria').value,
-                cuenta: document.getElementById('cuenta').value,
-                notas: document.getElementById('notas').value
+                id: Date.now(),
+                fecha: document.getElementById('g-fecha').value,
+                monto: document.getElementById('g-monto').value,
+                categoria: document.getElementById('g-categoria').value,
+                subcategoria: document.getElementById('g-subcategoria').value,
+                cuenta: document.getElementById('g-cuenta').value,
+                notas: document.getElementById('g-notas').value
             };
 
-            // Enviar datos al Google Sheet (Fetch API)
+            enviarDatos(datos, btn, msg, "Guardar Gasto", this, 'g-fecha');
+        });
+
+        // --- 4. ENVÍO DE SUELDOS ---
+        document.getElementById('formularioSueldos').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnGuardarSueldo');
+            const msg = document.getElementById('msgSueldos');
+            btn.innerText = "Guardando..."; btn.disabled = true; msg.classList.add("hidden");
+
+            const datos = {
+                accion: "nuevo_sueldo",
+                id: Date.now(),
+                mes: document.getElementById('s-mes').value,
+                fecha: document.getElementById('s-fecha').value,
+                monto: document.getElementById('s-monto').value,
+                porcentaje: document.getElementById('s-porcentaje').value,
+                estado: "Parcial" // Estado por defecto
+            };
+
+            enviarDatos(datos, btn, msg, "Registrar Sueldo", this, 's-fecha');
+        });
+
+        // --- 5. FUNCIÓN CENTRAL DE ENVÍO ---
+        function enviarDatos(datos, boton, mensajeDOM, textoBoton, formulario, idFecha) {
             fetch(urlApi, {
                 method: "POST",
-                mode: "no-cors", // Requerido para evitar bloqueos de seguridad de Google
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(datos)
             })
             .then(() => {
-                // Como usamos no-cors, asumimos éxito si no hay error de red
-                msg.innerText = "¡Gasto registrado con éxito!";
-                msg.className = "text-center text-sm font-semibold mt-2 text-green-600 block";
-                document.getElementById('formularioGastos').reset(); // Limpiar formulario
-                document.getElementById('fecha').valueAsDate = new Date(); // Reponer fecha
+                mensajeDOM.innerText = "¡Registro guardado con éxito!";
+                mensajeDOM.className = "text-center text-sm font-semibold mt-2 text-green-600 block";
+                formulario.reset(); 
+                document.getElementById(idFecha).valueAsDate = new Date(); 
             })
-            .catch((error) => {
-                msg.innerText = "Error de conexión. Intenta de nuevo.";
-                msg.className = "text-center text-sm font-semibold mt-2 text-red-600 block";
+            .catch(() => {
+                mensajeDOM.innerText = "Error. Revisa tu conexión.";
+                mensajeDOM.className = "text-center text-sm font-semibold mt-2 text-red-600 block";
             })
             .finally(() => {
-                btn.innerText = "Guardar Gasto";
-                btn.disabled = false;
+                boton.innerText = textoBoton;
+                boton.disabled = false;
             });
-        });
+        }
 
-        // Registrar el Service Worker para la PWA
+        // Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then(reg => console.log('Service Worker registrado con éxito'))
-                    .catch(err => console.log('Error al registrar Service Worker', err));
+                navigator.serviceWorker.register('./service-worker.js');
             });
         }
     </script>
