@@ -12,11 +12,13 @@
     <style>
         body { -ms-overflow-style: none; scrollbar-width: none; }
         body::-webkit-scrollbar { display: none; }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="bg-gray-100 font-sans pb-20">
 
-    <!-- ==================== GASTOS Y TRASPASOS ==================== -->
+    <!-- ==================== 1. MOVIMIENTOS ==================== -->
     <div id="seccion-gastos" class="seccion-app max-w-md mx-auto bg-white rounded-b-xl shadow-sm overflow-hidden md:max-w-2xl p-6">
         <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Registro de Movimientos</h1>
         <form id="formularioGastos" class="space-y-4">
@@ -36,7 +38,7 @@
                 </select>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700">Monto (Bs)</label>
+                <label class="block text-sm font-medium text-gray-700">Monto (Bs o USD)</label>
                 <input type="number" step="0.1" id="g-monto" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500">
             </div>
             <div id="contenedor-subcategoria">
@@ -53,8 +55,6 @@
                     <option value="Uglycash">Uglycash</option>
                 </select>
             </div>
-            
-            <!-- Cuenta Destino (Oculta por defecto, solo para traspasos) -->
             <div id="contenedor-destino" class="hidden bg-blue-50 p-3 rounded-md border border-blue-200">
                 <label class="block text-sm font-bold text-blue-700">Cuenta de Destino</label>
                 <select id="g-cuenta-destino" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500">
@@ -66,19 +66,16 @@
                     <option value="Uglycash">Uglycash</option>
                 </select>
             </div>
-
             <div>
                 <label class="block text-sm font-medium text-gray-700">Notas (Opcional)</label>
                 <input type="text" id="g-notas" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500">
             </div>
-            <button type="submit" id="btnGuardarGasto" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition shadow-md mt-4">
-                Guardar Movimiento
-            </button>
+            <button type="submit" id="btnGuardarGasto" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition shadow-md mt-4">Guardar Movimiento</button>
             <p id="msgGastos" class="text-center text-sm font-semibold mt-2 hidden"></p>
         </form>
     </div>
 
-    <!-- ==================== SUELDOS ==================== -->
+    <!-- ==================== 2. SUELDOS ==================== -->
     <div id="seccion-sueldos" class="seccion-app hidden max-w-md mx-auto bg-white rounded-b-xl shadow-sm overflow-hidden md:max-w-2xl p-6">
         <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Ingreso de Sueldo</h1>
         <form id="formularioSueldos" class="space-y-4">
@@ -92,39 +89,67 @@
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Monto Recibido (Bs)</label>
-                <!-- Al escribir aquí, se calculará el porcentaje -->
-                <input type="number" step="0.01" id="s-monto" placeholder="Sueldo base: 3351.06" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-green-500">
+                <input type="number" step="0.01" id="s-monto" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-green-500">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Porcentaje del mes (%)</label>
                 <input type="number" step="0.01" id="s-porcentaje" readonly class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100 text-gray-500">
-                <p class="text-xs text-gray-400 mt-1">Calculado automáticamente (Base: 3351.06 Bs)</p>
             </div>
-            <button type="submit" id="btnGuardarSueldo" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition shadow-md mt-4">
-                Registrar Sueldo
-            </button>
+            <button type="submit" id="btnGuardarSueldo" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition shadow-md mt-4">Registrar Sueldo</button>
             <p id="msgSueldos" class="text-center text-sm font-semibold mt-2 hidden"></p>
         </form>
     </div>
 
-    <!-- ==================== RESUMEN (MAQUETA PARA LA FASE 2) ==================== -->
+    <!-- ==================== 3. PLANIFICACIÓN / RESUMEN ==================== -->
     <div id="seccion-resumen" class="seccion-app hidden max-w-md mx-auto p-4 space-y-4">
+        
+        <div class="flex justify-between items-center mt-2 mb-2">
+            <h1 class="text-2xl font-bold text-gray-800">Planificación</h1>
+            <button onclick="cargarDatos()" class="text-blue-600 p-2 bg-blue-50 rounded-full hover:bg-blue-200 transition">
+                <span id="btn-sync" class="material-symbols-outlined">sync</span>
+            </button>
+        </div>
+        
+        <!-- Tarjeta de Saldos -->
+        <div class="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl shadow-lg p-5">
+            <h2 class="text-xs uppercase tracking-wider font-semibold opacity-80 mb-3">Liquidez Estimada</h2>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="bg-white/10 p-2 rounded-lg">
+                    <span class="opacity-80 text-xs">BNB</span>
+                    <p id="saldo-bnb" class="font-bold text-lg">0.00 Bs</p>
+                </div>
+                <div class="bg-white/10 p-2 rounded-lg">
+                    <span class="opacity-80 text-xs">BMSC</span>
+                    <p id="saldo-bmsc" class="font-bold text-lg">0.00 Bs</p>
+                </div>
+                <div class="bg-white/10 p-2 rounded-lg">
+                    <span class="opacity-80 text-xs">Billetera</span>
+                    <p id="saldo-billetera" class="font-bold text-lg">0.00 Bs</p>
+                </div>
+                <div class="bg-white/10 p-2 rounded-lg">
+                    <span class="opacity-80 text-xs">Binance/Ugly</span>
+                    <p id="saldo-usd" class="font-bold text-lg">0.00</p>
+                </div>
+            </div>
+            <p class="text-xs mt-3 opacity-60 text-center">*Los sueldos ingresan directo al BNB.</p>
+        </div>
+
         <!-- Tarjeta de Deuda de Sueldos -->
-        <div class="bg-red-50 border border-red-200 rounded-xl shadow-sm p-4">
-            <h2 class="text-red-700 font-bold flex items-center"><span class="material-symbols-outlined mr-2">warning</span> Sueldos Pendientes</h2>
-            <div class="mt-2 text-sm text-gray-700">
-                <p class="flex justify-between border-b pb-1"><span>Enero 2026</span> <span class="font-bold">50.00% (1675.53 Bs)</span></p>
-                <p class="flex justify-between border-b pb-1 mt-1"><span>Febrero 2026</span> <span class="font-bold">100% (3351.06 Bs)</span></p>
-                <p class="flex justify-between mt-1 text-xs text-gray-500 italic">*Esta sección pronto se calculará de tu base de datos.</p>
+        <div class="bg-white border border-red-200 rounded-xl shadow-sm p-5">
+            <h2 class="text-red-700 font-bold flex items-center mb-3">
+                <span class="material-symbols-outlined mr-2">warning</span> Salarios Pendientes
+            </h2>
+            <div id="lista-deudas" class="text-sm text-gray-700">
+                <p class="text-gray-500 italic text-center">Toca el botón de actualizar arriba...</p>
             </div>
         </div>
     </div>
 
-    <!-- MENÚ INFERIOR -->
+    <!-- ==================== MENÚ INFERIOR ==================== -->
     <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around p-2 shadow-lg">
         <button onclick="cambiarSeccion('gastos', this)" class="tab-btn flex flex-col items-center p-2 text-blue-600 w-1/3">
             <span class="material-symbols-outlined">sync_alt</span>
-            <span class="text-xs font-semibold mt-1">Movimientos</span>
+            <span class="text-xs font-semibold mt-1">Registrar</span>
         </button>
         <button onclick="cambiarSeccion('sueldos', this)" class="tab-btn flex flex-col items-center p-2 text-gray-400 w-1/3">
             <span class="material-symbols-outlined">payments</span>
@@ -132,121 +157,159 @@
         </button>
         <button onclick="cambiarSeccion('resumen', this)" class="tab-btn flex flex-col items-center p-2 text-gray-400 w-1/3">
             <span class="material-symbols-outlined">donut_small</span>
-            <span class="text-xs font-semibold mt-1">Planificación</span>
+            <span class="text-xs font-semibold mt-1">Planificar</span>
         </button>
     </div>
 
     <script>
-        const urlApi = "https://script.google.com/macros/s/AKfycbz473eKT8UghEfzOLjh6DTTZ8BIruXNwkBsyCv-YB7jVceXkvrpwWBSLGT9mWdskQyIww/exec"; // <--- PEGA TU URL
+        const urlApi = "https://script.google.com/macros/s/AKfycbz473eKT8UghEfzOLjh6DTTZ8BIruXNwkBsyCv-YB7jVceXkvrpwWBSLGT9mWdskQyIww/exec"; // <--- PEGA TU URL EXACTA AQUÍ
         const SUELDO_BASE = 3351.06;
 
         function cambiarSeccion(seccionActiva, botonClickeado) {
             document.querySelectorAll('.seccion-app').forEach(el => el.classList.add('hidden'));
             document.getElementById('seccion-' + seccionActiva).classList.remove('hidden');
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('text-blue-600');
-                btn.classList.add('text-gray-400');
+                btn.classList.remove('text-blue-600'); btn.classList.add('text-gray-400');
             });
             botonClickeado.classList.remove('text-gray-400');
             botonClickeado.classList.add('text-blue-600');
+            
+            // Si entra a resumen, cargar datos automáticamente
+            if(seccionActiva === 'resumen') cargarDatos();
         }
 
         document.getElementById('g-fecha').valueAsDate = new Date();
         document.getElementById('s-fecha').valueAsDate = new Date();
 
-        // --- CÁLCULO AUTOMÁTICO DE PORCENTAJE ---
         document.getElementById('s-monto').addEventListener('input', function(e) {
             const monto = parseFloat(e.target.value);
-            if (monto > 0) {
-                const porcentaje = (monto / SUELDO_BASE) * 100;
-                document.getElementById('s-porcentaje').value = porcentaje.toFixed(2);
-            } else {
-                document.getElementById('s-porcentaje').value = '';
-            }
+            document.getElementById('s-porcentaje').value = monto > 0 ? ((monto / SUELDO_BASE) * 100).toFixed(2) : '';
         });
 
-        // --- LÓGICA PARA MOSTRAR/OCULTAR CUENTA DESTINO EN TRASPASOS ---
         document.getElementById('g-categoria').addEventListener('change', function(e) {
             const esTraspaso = (e.target.value === "Traspaso");
-            const divDestino = document.getElementById('contenedor-destino');
-            const inputSubcategoria = document.getElementById('g-subcategoria');
-            
-            if (esTraspaso) {
-                divDestino.classList.remove('hidden');
-                inputSubcategoria.value = "Traspaso Interno";
-                inputSubcategoria.parentElement.classList.add('hidden');
-            } else {
-                divDestino.classList.add('hidden');
-                inputSubcategoria.value = "";
-                inputSubcategoria.parentElement.classList.remove('hidden');
-            }
+            document.getElementById('contenedor-destino').classList.toggle('hidden', !esTraspaso);
+            const sub = document.getElementById('g-subcategoria');
+            if (esTraspaso) { sub.value = "Traspaso Interno"; sub.parentElement.classList.add('hidden'); } 
+            else { sub.value = ""; sub.parentElement.classList.remove('hidden'); }
         });
 
-        // Enviar Movimientos
+        // ---------------- POST (GUARDAR DATOS) ----------------
         document.getElementById('formularioGastos').addEventListener('submit', function(e) {
             e.preventDefault();
-            const btn = document.getElementById('btnGuardarGasto');
-            const msg = document.getElementById('msgGastos');
-            btn.innerText = "Guardando..."; btn.disabled = true; msg.classList.add("hidden");
-
             const datos = {
-                accion: "nuevo_gasto",
-                id: Date.now(),
-                fecha: document.getElementById('g-fecha').value,
-                monto: document.getElementById('g-monto').value,
-                categoria: document.getElementById('g-categoria').value,
-                subcategoria: document.getElementById('g-subcategoria').value,
-                cuenta: document.getElementById('g-cuenta').value,
+                accion: "nuevo_gasto", id: Date.now(), fecha: document.getElementById('g-fecha').value,
+                monto: document.getElementById('g-monto').value, categoria: document.getElementById('g-categoria').value,
+                subcategoria: document.getElementById('g-subcategoria').value, cuenta: document.getElementById('g-cuenta').value,
                 cuenta_destino: document.getElementById('g-categoria').value === "Traspaso" ? document.getElementById('g-cuenta-destino').value : "",
                 notas: document.getElementById('g-notas').value
             };
-            enviarDatos(datos, btn, msg, "Guardar Movimiento", this, 'g-fecha');
+            enviarDatos(datos, document.getElementById('btnGuardarGasto'), document.getElementById('msgGastos'), "Guardar Movimiento", this, 'g-fecha');
         });
 
-        // Enviar Sueldos
         document.getElementById('formularioSueldos').addEventListener('submit', function(e) {
             e.preventDefault();
-            const btn = document.getElementById('btnGuardarSueldo');
-            const msg = document.getElementById('msgSueldos');
-            btn.innerText = "Guardando..."; btn.disabled = true; msg.classList.add("hidden");
-
             const datos = {
-                accion: "nuevo_sueldo",
-                id: Date.now(),
-                mes: document.getElementById('s-mes').value,
-                fecha: document.getElementById('s-fecha').value,
-                monto: document.getElementById('s-monto').value,
-                porcentaje: document.getElementById('s-porcentaje').value,
-                estado: "Parcial"
+                accion: "nuevo_sueldo", id: Date.now(), mes: document.getElementById('s-mes').value,
+                fecha: document.getElementById('s-fecha').value, monto: document.getElementById('s-monto').value,
+                porcentaje: document.getElementById('s-porcentaje').value, estado: "Parcial"
             };
-            enviarDatos(datos, btn, msg, "Registrar Sueldo", this, 's-fecha');
+            enviarDatos(datos, document.getElementById('btnGuardarSueldo'), document.getElementById('msgSueldos'), "Registrar Sueldo", this, 's-fecha');
         });
 
         function enviarDatos(datos, boton, mensajeDOM, textoBoton, formulario, idFecha) {
-            fetch(urlApi, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(datos)
-            })
+            boton.innerText = "Guardando..."; boton.disabled = true; mensajeDOM.classList.add("hidden");
+            fetch(urlApi, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(datos) })
             .then(() => {
-                mensajeDOM.innerText = "¡Registro guardado con éxito!";
-                mensajeDOM.className = "text-center text-sm font-semibold mt-2 text-green-600 block";
-                formulario.reset(); 
-                document.getElementById(idFecha).valueAsDate = new Date();
+                mensajeDOM.innerText = "¡Guardado con éxito!"; mensajeDOM.className = "text-center text-sm font-semibold mt-2 text-green-600 block";
+                formulario.reset(); document.getElementById(idFecha).valueAsDate = new Date();
                 document.getElementById('contenedor-destino').classList.add('hidden');
                 document.getElementById('g-subcategoria').parentElement.classList.remove('hidden');
             })
-            .catch(() => {
-                mensajeDOM.innerText = "Error de red.";
-                mensajeDOM.className = "text-center text-sm font-semibold mt-2 text-red-600 block";
-            })
+            .catch(() => { mensajeDOM.innerText = "Error de red."; mensajeDOM.className = "text-center text-sm text-red-600 block"; })
             .finally(() => { boton.innerText = textoBoton; boton.disabled = false; });
         }
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js'));
+        // ---------------- GET (LEER Y CALCULAR) ----------------
+        function cargarDatos() {
+            const btnSync = document.getElementById('btn-sync');
+            btnSync.classList.add('spin');
+            
+            fetch(urlApi) // Al no poner no-cors, permite leer la respuesta JSON
+            .then(res => res.json())
+            .then(data => {
+                // 1. CALCULAR SALDOS
+                let saldos = { "BNB": 0, "BMSC": 0, "Billetera": 0, "Binance": 0, "Uglycash": 0 };
+                
+                // Sumar Sueldos
+                data.sueldos.forEach(s => { if(s.monto) saldos["BNB"] += parseFloat(s.monto); });
+                
+                // Restar Gastos y Traspasos
+                data.gastos.forEach(g => {
+                    let m = parseFloat(g.monto);
+                    if(isNaN(m)) return;
+                    if(g.categoria === "Traspaso") {
+                        if(saldos[g.cuenta] !== undefined) saldos[g.cuenta] -= m;
+                        if(saldos[g.cuenta_destino] !== undefined) saldos[g.cuenta_destino] += m;
+                    } else {
+                        if(saldos[g.cuenta] !== undefined) saldos[g.cuenta] -= m;
+                    }
+                });
+                
+                document.getElementById('saldo-bnb').innerText = saldos["BNB"].toFixed(2) + " Bs";
+                document.getElementById('saldo-bmsc').innerText = saldos["BMSC"].toFixed(2) + " Bs";
+                document.getElementById('saldo-billetera').innerText = saldos["Billetera"].toFixed(2) + " Bs";
+                document.getElementById('saldo-usd').innerText = (saldos["Binance"] + saldos["Uglycash"]).toFixed(2);
+
+                // 2. CALCULAR DEUDAS DE SUELDO
+                let pagosPorMes = {};
+                data.sueldos.forEach(s => {
+                    if(!s.mes) return; // formato YYYY-MM
+                    let mesStr = String(s.mes).substring(0,7);
+                    if(!pagosPorMes[mesStr]) pagosPorMes[mesStr] = 0;
+                    pagosPorMes[mesStr] += parseFloat(s.porcentaje);
+                });
+
+                let mesesKeys = Object.keys(pagosPorMes).sort();
+                let htmlDeuda = "";
+                
+                if(mesesKeys.length > 0) {
+                    let minMes = mesesKeys[0]; 
+                    let tempDate = new Date(minMes + "-02"); // Iniciar desde el primer mes registrado
+                    let curDate = new Date(); // Fecha de hoy
+                    
+                    while(tempDate <= curDate) {
+                        let y = tempDate.getFullYear();
+                        let m = (tempDate.getMonth() + 1).toString().padStart(2, '0');
+                        let mesId = `${y}-${m}`;
+                        
+                        let pagado = pagosPorMes[mesId] || 0;
+                        if(pagado < 100) {
+                            let faltanteBs = ((100 - pagado) / 100) * SUELDO_BASE;
+                            htmlDeuda += `
+                                <p class="flex justify-between border-b border-red-100 pb-2 mt-2">
+                                    <span>${mesId}</span> 
+                                    <span class="font-bold text-red-600">${(100 - pagado).toFixed(2)}% (${faltanteBs.toFixed(2)} Bs)</span>
+                                </p>`;
+                        }
+                        tempDate.setMonth(tempDate.getMonth() + 1); // Avanzar un mes
+                    }
+                }
+                
+                if(htmlDeuda === "") htmlDeuda = "<p class='text-green-600 mt-2 font-bold text-center'>¡Todos tus sueldos están al día!</p>";
+                else htmlDeuda += "<p class='text-xs text-gray-400 mt-3 text-center'>Cálculo dinámico hasta la fecha actual.</p>";
+                
+                document.getElementById('lista-deudas').innerHTML = htmlDeuda;
+            })
+            .catch(err => {
+                document.getElementById('lista-deudas').innerHTML = "<p class='text-red-500 text-center'>Error de conexión al cargar datos.</p>";
+            })
+            .finally(() => {
+                btnSync.classList.remove('spin');
+            });
         }
+
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js')); }
     </script>
 </body>
 </html>
