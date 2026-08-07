@@ -14,299 +14,373 @@
         body::-webkit-scrollbar { display: none; }
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        /* Para dar un pequeño efecto de llenado a la barra de presupuesto */
+        .progress-bar { transition: width 0.5s ease-in-out; }
     </style>
 </head>
 <body class="bg-gray-100 font-sans pb-20">
 
-    <!-- ==================== 1. MOVIMIENTOS ==================== -->
-    <div id="seccion-gastos" class="seccion-app max-w-md mx-auto bg-white rounded-b-xl shadow-sm overflow-hidden md:max-w-2xl p-6">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Registro de Movimientos</h1>
-        <form id="formularioGastos" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Fecha</label>
-                <input type="date" id="g-fecha" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Categoría</label>
-                <select id="g-categoria" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500">
-                    <option value="">Selecciona...</option>
+    <!-- BARRA SUPERIOR DE SINCRONIZACIÓN GLOBAL -->
+    <div class="bg-white shadow-sm p-3 flex justify-between items-center sticky top-0 z-10">
+        <h1 class="font-bold text-gray-800 text-lg">Finanzas</h1>
+        <button onclick="cargarDatosGlobles()" class="text-blue-600 bg-blue-50 p-2 rounded-full hover:bg-blue-100">
+            <span id="btn-sync-global" class="material-symbols-outlined block">sync</span>
+        </button>
+    </div>
+
+    <!-- ==================== 1. REGISTRAR GASTOS ==================== -->
+    <div id="seccion-gastos" class="seccion-app max-w-md mx-auto p-4">
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Nuevo Movimiento</h2>
+            <form id="formularioGastos" class="space-y-4">
+                <input type="date" id="g-fecha" required class="w-full rounded-md border-gray-300 p-2 border focus:ring-blue-500">
+                <select id="g-categoria" required class="w-full rounded-md border-gray-300 p-2 border focus:ring-blue-500">
+                    <option value="">Categoría...</option>
                     <option value="Fijo">Gasto Fijo</option>
                     <option value="Variable">Gasto Variable</option>
                     <option value="Imprevisto">Imprevisto</option>
                     <option value="Ahorro/Destino">Ahorro / Ayuda</option>
                     <option value="Traspaso" class="font-bold text-blue-600">Traspaso / Cambio Divisa</option>
                 </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Monto (Bs o USD)</label>
-                <input type="number" step="0.1" id="g-monto" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500">
-            </div>
-            <div id="contenedor-subcategoria">
-                <label class="block text-sm font-medium text-gray-700">Subcategoría</label>
-                <input type="text" id="g-subcategoria" placeholder="Ej: Pasajes, Gym..." class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Cuenta de Origen</label>
-                <select id="g-cuenta" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500">
+                <input type="number" step="0.1" id="g-monto" placeholder="Monto (Bs)" required class="w-full rounded-md border-gray-300 p-2 border focus:ring-blue-500">
+                <div id="contenedor-subcategoria">
+                    <input type="text" id="g-subcategoria" placeholder="Subcategoría (Ej: Pasajes, Gym)" class="w-full rounded-md border-gray-300 p-2 border focus:ring-blue-500">
+                </div>
+                <select id="g-cuenta" required class="w-full rounded-md border-gray-300 p-2 border focus:ring-blue-500">
+                    <option value="">Origen...</option>
                     <option value="BNB">BNB</option>
                     <option value="BMSC">BMSC</option>
                     <option value="Billetera">Billetera (Efectivo)</option>
                     <option value="Binance">Binance (USDT)</option>
                     <option value="Uglycash">Uglycash</option>
                 </select>
-            </div>
-            <div id="contenedor-destino" class="hidden bg-blue-50 p-3 rounded-md border border-blue-200">
-                <label class="block text-sm font-bold text-blue-700">Cuenta de Destino</label>
-                <select id="g-cuenta-destino" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500">
-                    <option value="">Selecciona destino...</option>
-                    <option value="BNB">BNB</option>
-                    <option value="BMSC">BMSC</option>
-                    <option value="Billetera">Billetera (Efectivo)</option>
-                    <option value="Binance">Binance (USDT)</option>
-                    <option value="Uglycash">Uglycash</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Notas (Opcional)</label>
-                <input type="text" id="g-notas" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-blue-500">
-            </div>
-            <button type="submit" id="btnGuardarGasto" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition shadow-md mt-4">Guardar Movimiento</button>
-            <p id="msgGastos" class="text-center text-sm font-semibold mt-2 hidden"></p>
-        </form>
-    </div>
-
-    <!-- ==================== 2. SUELDOS ==================== -->
-    <div id="seccion-sueldos" class="seccion-app hidden max-w-md mx-auto bg-white rounded-b-xl shadow-sm overflow-hidden md:max-w-2xl p-6">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Ingreso de Sueldo</h1>
-        <form id="formularioSueldos" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Mes a cobrar</label>
-                <input type="month" id="s-mes" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-green-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Fecha de Pago</label>
-                <input type="date" id="s-fecha" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-green-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Monto Recibido (Bs)</label>
-                <input type="number" step="0.01" id="s-monto" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-green-500">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Porcentaje del mes (%)</label>
-                <input type="number" step="0.01" id="s-porcentaje" readonly class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100 text-gray-500">
-            </div>
-            <button type="submit" id="btnGuardarSueldo" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition shadow-md mt-4">Registrar Sueldo</button>
-            <p id="msgSueldos" class="text-center text-sm font-semibold mt-2 hidden"></p>
-        </form>
-    </div>
-
-    <!-- ==================== 3. PLANIFICACIÓN / RESUMEN ==================== -->
-    <div id="seccion-resumen" class="seccion-app hidden max-w-md mx-auto p-4 space-y-4">
-        
-        <div class="flex justify-between items-center mt-2 mb-2">
-            <h1 class="text-2xl font-bold text-gray-800">Planificación</h1>
-            <button onclick="cargarDatos()" class="text-blue-600 p-2 bg-blue-50 rounded-full hover:bg-blue-200 transition">
-                <span id="btn-sync" class="material-symbols-outlined">sync</span>
-            </button>
+                <div id="contenedor-destino" class="hidden bg-blue-50 p-2 rounded-md border border-blue-200">
+                    <select id="g-cuenta-destino" class="w-full rounded-md border-gray-300 p-2 border">
+                        <option value="">Destino...</option>
+                        <option value="BNB">BNB</option>
+                        <option value="BMSC">BMSC</option>
+                        <option value="Billetera">Billetera</option>
+                        <option value="Binance">Binance</option>
+                        <option value="Uglycash">Uglycash</option>
+                    </select>
+                </div>
+                <input type="text" id="g-notas" placeholder="Notas (Opcional)" class="w-full rounded-md border-gray-300 p-2 border focus:ring-blue-500">
+                <button type="submit" id="btnGuardarGasto" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg">Guardar</button>
+                <p id="msgGastos" class="text-center text-sm font-semibold hidden"></p>
+            </form>
         </div>
-        
-        <!-- Tarjeta de Saldos -->
+    </div>
+
+    <!-- ==================== 2. HISTORIAL ==================== -->
+    <div id="seccion-historial" class="seccion-app hidden max-w-md mx-auto p-4">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Movimientos</h2>
+        <input type="month" id="filtro-mes-historial" class="w-full mb-4 rounded-md border-gray-300 p-2 border shadow-sm" onchange="renderizarHistorial()">
+        <div id="contenedor-lista-historial" class="space-y-3">
+            <p class="text-gray-500 text-center text-sm italic mt-10">Sincroniza para ver datos...</p>
+        </div>
+    </div>
+
+    <!-- ==================== 3. SUELDOS ==================== -->
+    <div id="seccion-sueldos" class="seccion-app hidden max-w-md mx-auto p-4">
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">Registrar Sueldo</h2>
+            <form id="formularioSueldos" class="space-y-4">
+                <label class="block text-xs text-gray-500">Mes Devengado</label>
+                <input type="month" id="s-mes" required class="w-full rounded-md border-gray-300 p-2 border">
+                <label class="block text-xs text-gray-500">Fecha de Pago</label>
+                <input type="date" id="s-fecha" required class="w-full rounded-md border-gray-300 p-2 border">
+                <input type="number" step="0.01" id="s-monto" placeholder="Monto (Bs)" required class="w-full rounded-md border-gray-300 p-2 border">
+                <div class="flex items-center space-x-2">
+                    <input type="number" step="0.01" id="s-porcentaje" readonly class="w-1/3 rounded-md border-gray-300 p-2 bg-gray-100 text-gray-500">
+                    <span class="text-sm text-gray-500">% Automático</span>
+                </div>
+                <button type="submit" id="btnGuardarSueldo" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg">Registrar</button>
+                <p id="msgSueldos" class="text-center text-sm font-semibold hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== 4. ESTADO ==================== -->
+    <div id="seccion-resumen" class="seccion-app hidden max-w-md mx-auto p-4 space-y-4">
         <div class="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl shadow-lg p-5">
-            <h2 class="text-xs uppercase tracking-wider font-semibold opacity-80 mb-3">Liquidez Estimada</h2>
+            <h2 class="text-xs uppercase tracking-wider font-semibold opacity-80 mb-3">Saldos Estimados</h2>
             <div class="grid grid-cols-2 gap-3 text-sm">
                 <div class="bg-white/10 p-2 rounded-lg">
-                    <span class="opacity-80 text-xs">BNB</span>
-                    <p id="saldo-bnb" class="font-bold text-lg">0.00 Bs</p>
+                    <span class="opacity-80 text-xs">BNB</span><p id="saldo-bnb" class="font-bold text-lg">0.00 Bs</p>
                 </div>
                 <div class="bg-white/10 p-2 rounded-lg">
-                    <span class="opacity-80 text-xs">BMSC</span>
-                    <p id="saldo-bmsc" class="font-bold text-lg">0.00 Bs</p>
+                    <span class="opacity-80 text-xs">BMSC</span><p id="saldo-bmsc" class="font-bold text-lg">0.00 Bs</p>
                 </div>
                 <div class="bg-white/10 p-2 rounded-lg">
-                    <span class="opacity-80 text-xs">Billetera</span>
-                    <p id="saldo-billetera" class="font-bold text-lg">0.00 Bs</p>
+                    <span class="opacity-80 text-xs">Billetera</span><p id="saldo-billetera" class="font-bold text-lg">0.00 Bs</p>
                 </div>
                 <div class="bg-white/10 p-2 rounded-lg">
-                    <span class="opacity-80 text-xs">Binance/Ugly</span>
-                    <p id="saldo-usd" class="font-bold text-lg">0.00</p>
+                    <span class="opacity-80 text-xs">Binance/Ugly</span><p id="saldo-usd" class="font-bold text-lg">0.00</p>
                 </div>
             </div>
-            <p class="text-xs mt-3 opacity-60 text-center">*Los sueldos ingresan directo al BNB.</p>
         </div>
-
-        <!-- Tarjeta de Deuda de Sueldos -->
         <div class="bg-white border border-red-200 rounded-xl shadow-sm p-5">
-            <h2 class="text-red-700 font-bold flex items-center mb-3">
-                <span class="material-symbols-outlined mr-2">warning</span> Salarios Pendientes
-            </h2>
-            <div id="lista-deudas" class="text-sm text-gray-700">
-                <p class="text-gray-500 italic text-center">Toca el botón de actualizar arriba...</p>
-            </div>
+            <h2 class="text-red-700 font-bold flex items-center mb-3"><span class="material-symbols-outlined mr-2">warning</span> Salarios Pendientes</h2>
+            <div id="lista-deudas" class="text-sm text-gray-700"><p class="text-gray-500 italic text-center">Sincroniza arriba...</p></div>
         </div>
     </div>
 
-    <!-- ==================== MENÚ INFERIOR ==================== -->
-    <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around p-2 shadow-lg">
-        <button onclick="cambiarSeccion('gastos', this)" class="tab-btn flex flex-col items-center p-2 text-blue-600 w-1/3">
-            <span class="material-symbols-outlined">sync_alt</span>
-            <span class="text-xs font-semibold mt-1">Registrar</span>
+    <!-- ==================== 5. PRESUPUESTO ==================== -->
+    <div id="seccion-presupuesto" class="seccion-app hidden max-w-md mx-auto p-4">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Planificación Mensual</h2>
+        
+        <input type="month" id="filtro-mes-presupuesto" class="w-full mb-4 rounded-md border-gray-300 p-2 border shadow-sm" onchange="renderizarPresupuestos()">
+        
+        <!-- Formulario para asignar nuevo presupuesto -->
+        <div class="bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
+            <h3 class="text-sm font-bold text-gray-700 mb-2">Asignar Límite / Meta</h3>
+            <div class="flex space-x-2">
+                <select id="p-categoria" class="w-1/2 rounded-md border p-2 text-sm">
+                    <option value="Fijo">Fijo</option>
+                    <option value="Variable">Variable</option>
+                    <option value="Ahorro/Destino">Ahorro/Ayuda</option>
+                </select>
+                <input type="number" id="p-monto" placeholder="Monto Bs" class="w-1/3 rounded-md border p-2 text-sm">
+                <button onclick="guardarPresupuesto()" id="btnGuardarPresupuesto" class="w-1/6 bg-blue-600 text-white rounded-md flex justify-center items-center">
+                    <span class="material-symbols-outlined">add</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Lista de Barras de Progreso -->
+        <div id="contenedor-barras-presupuesto" class="space-y-5">
+            <p class="text-gray-500 text-center text-sm italic mt-4">Sincroniza para ver datos...</p>
+        </div>
+    </div>
+
+    <!-- ==================== MENÚ INFERIOR (5 TABS) ==================== -->
+    <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around p-2 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] text-[10px]">
+        <button onclick="cambiarSeccion('gastos', this)" class="tab-btn flex flex-col items-center text-blue-600 w-1/5">
+            <span class="material-symbols-outlined text-2xl">add_circle</span><span class="mt-1">Reg</span>
         </button>
-        <button onclick="cambiarSeccion('sueldos', this)" class="tab-btn flex flex-col items-center p-2 text-gray-400 w-1/3">
-            <span class="material-symbols-outlined">payments</span>
-            <span class="text-xs font-semibold mt-1">Sueldos</span>
+        <button onclick="cambiarSeccion('historial', this)" class="tab-btn flex flex-col items-center text-gray-400 w-1/5">
+            <span class="material-symbols-outlined text-2xl">receipt_long</span><span class="mt-1">Hist</span>
         </button>
-        <button onclick="cambiarSeccion('resumen', this)" class="tab-btn flex flex-col items-center p-2 text-gray-400 w-1/3">
-            <span class="material-symbols-outlined">donut_small</span>
-            <span class="text-xs font-semibold mt-1">Planificar</span>
+        <button onclick="cambiarSeccion('sueldos', this)" class="tab-btn flex flex-col items-center text-gray-400 w-1/5">
+            <span class="material-symbols-outlined text-2xl">payments</span><span class="mt-1">Sueldos</span>
+        </button>
+        <button onclick="cambiarSeccion('resumen', this)" class="tab-btn flex flex-col items-center text-gray-400 w-1/5">
+            <span class="material-symbols-outlined text-2xl">account_balance</span><span class="mt-1">Estado</span>
+        </button>
+        <button onclick="cambiarSeccion('presupuesto', this)" class="tab-btn flex flex-col items-center text-gray-400 w-1/5">
+            <span class="material-symbols-outlined text-2xl">track_changes</span><span class="mt-1">Plan</span>
         </button>
     </div>
 
     <script>
-        const urlApi = "https://script.google.com/macros/s/AKfycbz473eKT8UghEfzOLjh6DTTZ8BIruXNwkBsyCv-YB7jVceXkvrpwWBSLGT9mWdskQyIww/exec"; // <--- PEGA TU URL EXACTA AQUÍ
+        const urlApi = "https://script.google.com/macros/s/AKfycbz473eKT8UghEfzOLjh6DTTZ8BIruXNwkBsyCv-YB7jVceXkvrpwWBSLGT9mWdskQyIww/exec"; // <--- PEGA TU URL EXACTA
         const SUELDO_BASE = 3351.06;
+        
+        // Variables globales para almacenar la info descargada
+        let datosGlobales = { sueldos: [], gastos: [], presupuestos: [] };
 
+        // --- NAVEGACIÓN ---
         function cambiarSeccion(seccionActiva, botonClickeado) {
             document.querySelectorAll('.seccion-app').forEach(el => el.classList.add('hidden'));
             document.getElementById('seccion-' + seccionActiva).classList.remove('hidden');
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('text-blue-600'); btn.classList.add('text-gray-400');
-            });
-            botonClickeado.classList.remove('text-gray-400');
-            botonClickeado.classList.add('text-blue-600');
-            
-            // Si entra a resumen, cargar datos automáticamente
-            if(seccionActiva === 'resumen') cargarDatos();
+            document.querySelectorAll('.tab-btn').forEach(btn => { btn.classList.remove('text-blue-600'); btn.classList.add('text-gray-400'); });
+            botonClickeado.classList.remove('text-gray-400'); botonClickeado.classList.add('text-blue-600');
         }
 
-        document.getElementById('g-fecha').valueAsDate = new Date();
-        document.getElementById('s-fecha').valueAsDate = new Date();
+        // --- INICIALIZACIÓN FECHAS ---
+        const hoy = new Date();
+        document.getElementById('g-fecha').valueAsDate = hoy;
+        document.getElementById('s-fecha').valueAsDate = hoy;
+        
+        let mesActualStr = hoy.toISOString().substring(0, 7); // "YYYY-MM"
+        document.getElementById('filtro-mes-historial').value = mesActualStr;
+        document.getElementById('filtro-mes-presupuesto').value = mesActualStr;
 
-        document.getElementById('s-monto').addEventListener('input', function(e) {
-            const monto = parseFloat(e.target.value);
-            document.getElementById('s-porcentaje').value = monto > 0 ? ((monto / SUELDO_BASE) * 100).toFixed(2) : '';
+        // --- EVENTOS FORMULARIOS MENORES ---
+        document.getElementById('s-monto').addEventListener('input', e => {
+            document.getElementById('s-porcentaje').value = e.target.value > 0 ? ((e.target.value / SUELDO_BASE) * 100).toFixed(2) : '';
         });
-
-        document.getElementById('g-categoria').addEventListener('change', function(e) {
+        document.getElementById('g-categoria').addEventListener('change', e => {
             const esTraspaso = (e.target.value === "Traspaso");
             document.getElementById('contenedor-destino').classList.toggle('hidden', !esTraspaso);
             const sub = document.getElementById('g-subcategoria');
-            if (esTraspaso) { sub.value = "Traspaso Interno"; sub.parentElement.classList.add('hidden'); } 
+            if (esTraspaso) { sub.value = "Traspaso"; sub.parentElement.classList.add('hidden'); } 
             else { sub.value = ""; sub.parentElement.classList.remove('hidden'); }
         });
 
-        // ---------------- POST (GUARDAR DATOS) ----------------
+        // --- FUNCIONES DE ENVÍO DE DATOS ---
+        function enviarGenerico(datos, boton, txtOriginal) {
+            boton.innerHTML = '<span class="material-symbols-outlined spin">sync</span>'; boton.disabled = true;
+            fetch(urlApi, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(datos) })
+            .then(() => { 
+                alert("Guardado correctamente"); 
+                cargarDatosGlobles(); // Recargar datos tras guardar
+            })
+            .catch(() => alert("Error al guardar"))
+            .finally(() => { boton.innerText = txtOriginal; boton.disabled = false; });
+        }
+
         document.getElementById('formularioGastos').addEventListener('submit', function(e) {
             e.preventDefault();
-            const datos = {
-                accion: "nuevo_gasto", id: Date.now(), fecha: document.getElementById('g-fecha').value,
-                monto: document.getElementById('g-monto').value, categoria: document.getElementById('g-categoria').value,
-                subcategoria: document.getElementById('g-subcategoria').value, cuenta: document.getElementById('g-cuenta').value,
-                cuenta_destino: document.getElementById('g-categoria').value === "Traspaso" ? document.getElementById('g-cuenta-destino').value : "",
-                notas: document.getElementById('g-notas').value
-            };
-            enviarDatos(datos, document.getElementById('btnGuardarGasto'), document.getElementById('msgGastos'), "Guardar Movimiento", this, 'g-fecha');
+            let cDestino = document.getElementById('g-categoria').value === "Traspaso" ? document.getElementById('g-cuenta-destino').value : "";
+            enviarGenerico({ accion: "nuevo_gasto", id: Date.now(), fecha: document.getElementById('g-fecha').value, monto: document.getElementById('g-monto').value, categoria: document.getElementById('g-categoria').value, subcategoria: document.getElementById('g-subcategoria').value, cuenta: document.getElementById('g-cuenta').value, cuenta_destino: cDestino, notas: document.getElementById('g-notas').value }, document.getElementById('btnGuardarGasto'), "Guardar");
+            this.reset(); document.getElementById('g-fecha').valueAsDate = new Date();
         });
 
         document.getElementById('formularioSueldos').addEventListener('submit', function(e) {
             e.preventDefault();
-            const datos = {
-                accion: "nuevo_sueldo", id: Date.now(), mes: document.getElementById('s-mes').value,
-                fecha: document.getElementById('s-fecha').value, monto: document.getElementById('s-monto').value,
-                porcentaje: document.getElementById('s-porcentaje').value, estado: "Parcial"
-            };
-            enviarDatos(datos, document.getElementById('btnGuardarSueldo'), document.getElementById('msgSueldos'), "Registrar Sueldo", this, 's-fecha');
+            enviarGenerico({ accion: "nuevo_sueldo", id: Date.now(), mes: document.getElementById('s-mes').value, fecha: document.getElementById('s-fecha').value, monto: document.getElementById('s-monto').value, porcentaje: document.getElementById('s-porcentaje').value, estado: "Parcial" }, document.getElementById('btnGuardarSueldo'), "Registrar");
+            this.reset(); document.getElementById('s-fecha').valueAsDate = new Date();
         });
 
-        function enviarDatos(datos, boton, mensajeDOM, textoBoton, formulario, idFecha) {
-            boton.innerText = "Guardando..."; boton.disabled = true; mensajeDOM.classList.add("hidden");
-            fetch(urlApi, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(datos) })
-            .then(() => {
-                mensajeDOM.innerText = "¡Guardado con éxito!"; mensajeDOM.className = "text-center text-sm font-semibold mt-2 text-green-600 block";
-                formulario.reset(); document.getElementById(idFecha).valueAsDate = new Date();
-                document.getElementById('contenedor-destino').classList.add('hidden');
-                document.getElementById('g-subcategoria').parentElement.classList.remove('hidden');
-            })
-            .catch(() => { mensajeDOM.innerText = "Error de red."; mensajeDOM.className = "text-center text-sm text-red-600 block"; })
-            .finally(() => { boton.innerText = textoBoton; boton.disabled = false; });
+        function guardarPresupuesto() {
+            let mes = document.getElementById('filtro-mes-presupuesto').value;
+            let cat = document.getElementById('p-categoria').value;
+            let monto = document.getElementById('p-monto').value;
+            if(!mes || !cat || !monto) return alert("Llena todos los campos");
+            enviarGenerico({ accion: "guardar_presupuesto", id: Date.now(), mes: mes, categoria: cat, monto: monto }, document.getElementById('btnGuardarPresupuesto'), "add");
+            document.getElementById('p-monto').value = "";
         }
 
-        // ---------------- GET (LEER Y CALCULAR) ----------------
-        function cargarDatos() {
-            const btnSync = document.getElementById('btn-sync');
+        // --- CEREBRO: DESCARGAR Y PROCESAR TODO ---
+        function cargarDatosGlobles() {
+            const btnSync = document.getElementById('btn-sync-global');
             btnSync.classList.add('spin');
             
-            fetch(urlApi) // Al no poner no-cors, permite leer la respuesta JSON
+            fetch(urlApi)
             .then(res => res.json())
             .then(data => {
-                // 1. CALCULAR SALDOS
-                let saldos = { "BNB": 0, "BMSC": 0, "Billetera": 0, "Binance": 0, "Uglycash": 0 };
+                datosGlobales = data;
                 
-                // Sumar Sueldos
-                data.sueldos.forEach(s => { if(s.monto) saldos["BNB"] += parseFloat(s.monto); });
-                
-                // Restar Gastos y Traspasos
-                data.gastos.forEach(g => {
-                    let m = parseFloat(g.monto);
-                    if(isNaN(m)) return;
-                    if(g.categoria === "Traspaso") {
-                        if(saldos[g.cuenta] !== undefined) saldos[g.cuenta] -= m;
-                        if(saldos[g.cuenta_destino] !== undefined) saldos[g.cuenta_destino] += m;
-                    } else {
-                        if(saldos[g.cuenta] !== undefined) saldos[g.cuenta] -= m;
-                    }
-                });
-                
-                document.getElementById('saldo-bnb').innerText = saldos["BNB"].toFixed(2) + " Bs";
-                document.getElementById('saldo-bmsc').innerText = saldos["BMSC"].toFixed(2) + " Bs";
-                document.getElementById('saldo-billetera').innerText = saldos["Billetera"].toFixed(2) + " Bs";
-                document.getElementById('saldo-usd').innerText = (saldos["Binance"] + saldos["Uglycash"]).toFixed(2);
+                // 1. Procesar Estado (Saldos y Deudas)
+                procesarSaldosYDeudas();
+                // 2. Procesar Historial
+                renderizarHistorial();
+                // 3. Procesar Presupuestos
+                renderizarPresupuestos();
+            })
+            .catch(err => alert("Error descargando datos"))
+            .finally(() => btnSync.classList.remove('spin'));
+        }
 
-                // 2. CALCULAR DEUDAS DE SUELDO
-                let pagosPorMes = {};
-                data.sueldos.forEach(s => {
-                    if(!s.mes) return; // formato YYYY-MM
-                    let mesStr = String(s.mes).substring(0,7);
-                    if(!pagosPorMes[mesStr]) pagosPorMes[mesStr] = 0;
-                    pagosPorMes[mesStr] += parseFloat(s.porcentaje);
-                });
-
-                let mesesKeys = Object.keys(pagosPorMes).sort();
-                let htmlDeuda = "";
-                
-                if(mesesKeys.length > 0) {
-                    let minMes = mesesKeys[0]; 
-                    let tempDate = new Date(minMes + "-02"); // Iniciar desde el primer mes registrado
-                    let curDate = new Date(); // Fecha de hoy
-                    
-                    while(tempDate <= curDate) {
-                        let y = tempDate.getFullYear();
-                        let m = (tempDate.getMonth() + 1).toString().padStart(2, '0');
-                        let mesId = `${y}-${m}`;
-                        
-                        let pagado = pagosPorMes[mesId] || 0;
-                        if(pagado < 100) {
-                            let faltanteBs = ((100 - pagado) / 100) * SUELDO_BASE;
-                            htmlDeuda += `
-                                <p class="flex justify-between border-b border-red-100 pb-2 mt-2">
-                                    <span>${mesId}</span> 
-                                    <span class="font-bold text-red-600">${(100 - pagado).toFixed(2)}% (${faltanteBs.toFixed(2)} Bs)</span>
-                                </p>`;
-                        }
-                        tempDate.setMonth(tempDate.getMonth() + 1); // Avanzar un mes
-                    }
+        function procesarSaldosYDeudas() {
+            let saldos = { "BNB": 0, "BMSC": 0, "Billetera": 0, "Binance": 0, "Uglycash": 0 };
+            datosGlobales.sueldos.forEach(s => { if(s.monto) saldos["BNB"] += parseFloat(s.monto); });
+            datosGlobales.gastos.forEach(g => {
+                let m = parseFloat(g.monto);
+                if(isNaN(m)) return;
+                if(g.categoria === "Traspaso") {
+                    if(saldos[g.cuenta] !== undefined) saldos[g.cuenta] -= m;
+                    if(saldos[g.cuenta_destino] !== undefined) saldos[g.cuenta_destino] += m;
+                } else {
+                    if(saldos[g.cuenta] !== undefined) saldos[g.cuenta] -= m;
                 }
-                
-                if(htmlDeuda === "") htmlDeuda = "<p class='text-green-600 mt-2 font-bold text-center'>¡Todos tus sueldos están al día!</p>";
-                else htmlDeuda += "<p class='text-xs text-gray-400 mt-3 text-center'>Cálculo dinámico hasta la fecha actual.</p>";
-                
-                document.getElementById('lista-deudas').innerHTML = htmlDeuda;
-            })
-            .catch(err => {
-                document.getElementById('lista-deudas').innerHTML = "<p class='text-red-500 text-center'>Error de conexión al cargar datos.</p>";
-            })
-            .finally(() => {
-                btnSync.classList.remove('spin');
             });
+            document.getElementById('saldo-bnb').innerText = saldos["BNB"].toFixed(2) + " Bs";
+            document.getElementById('saldo-bmsc').innerText = saldos["BMSC"].toFixed(2) + " Bs";
+            document.getElementById('saldo-billetera').innerText = saldos["Billetera"].toFixed(2) + " Bs";
+            document.getElementById('saldo-usd').innerText = (saldos["Binance"] + saldos["Uglycash"]).toFixed(2);
+
+            let pagosPorMes = {};
+            datosGlobales.sueldos.forEach(s => {
+                if(!s.mes) return; let mesStr = String(s.mes).substring(0,7);
+                if(!pagosPorMes[mesStr]) pagosPorMes[mesStr] = 0;
+                pagosPorMes[mesStr] += parseFloat(s.porcentaje);
+            });
+            let mesesKeys = Object.keys(pagosPorMes).sort();
+            let htmlDeuda = "";
+            if(mesesKeys.length > 0) {
+                let tempDate = new Date(mesesKeys[0] + "-02"); 
+                while(tempDate <= new Date()) {
+                    let mesId = `${tempDate.getFullYear()}-${(tempDate.getMonth()+1).toString().padStart(2,'0')}`;
+                    let pagado = pagosPorMes[mesId] || 0;
+                    if(pagado < 100) {
+                        htmlDeuda += `<p class="flex justify-between border-b pb-2 mt-2"><span>${mesId}</span> <span class="font-bold text-red-600">${(100 - pagado).toFixed(2)}% (${(((100 - pagado)/100)*SUELDO_BASE).toFixed(2)} Bs)</span></p>`;
+                    }
+                    tempDate.setMonth(tempDate.getMonth() + 1);
+                }
+            }
+            document.getElementById('lista-deudas').innerHTML = htmlDeuda || "<p class='text-green-600 mt-2 text-center'>¡Al día!</p>";
+        }
+
+        function renderizarHistorial() {
+            let mesFiltro = document.getElementById('filtro-mes-historial').value;
+            let contenedor = document.getElementById('contenedor-lista-historial');
+            
+            // Filtrar y ordenar gastos del más reciente al más antiguo
+            let gastosMes = datosGlobales.gastos.filter(g => String(g.fecha).startsWith(mesFiltro));
+            gastosMes.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            if(gastosMes.length === 0) { contenedor.innerHTML = "<p class='text-center text-gray-500'>No hay movimientos en este mes.</p>"; return; }
+            
+            let html = "";
+            gastosMes.forEach(g => {
+                let icono = g.categoria === "Traspaso" ? "sync_alt" : (g.categoria === "Ahorro/Destino" ? "savings" : "shopping_cart");
+                let color = g.categoria === "Traspaso" ? "text-blue-500" : "text-red-500";
+                let detalle = g.categoria === "Traspaso" ? `${g.cuenta} → ${g.cuenta_destino}` : g.cuenta;
+                
+                html += `
+                <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="bg-gray-100 p-2 rounded-full mr-3"><span class="material-symbols-outlined ${color}">${icono}</span></div>
+                        <div>
+                            <p class="font-bold text-sm text-gray-800">${g.subcategoria}</p>
+                            <p class="text-xs text-gray-500">${g.fecha.substring(8,10)} | ${detalle} ${g.notas ? ' | '+g.notas : ''}</p>
+                        </div>
+                    </div>
+                    <span class="font-bold ${color}">${g.categoria === "Traspaso" ? '' : '-'} ${parseFloat(g.monto).toFixed(2)}</span>
+                </div>`;
+            });
+            contenedor.innerHTML = html;
+        }
+
+        function renderizarPresupuestos() {
+            let mesFiltro = document.getElementById('filtro-mes-presupuesto').value;
+            let contenedor = document.getElementById('contenedor-barras-presupuesto');
+            
+            // 1. Obtener los límites para el mes seleccionado (Tomamos el último guardado si hay duplicados)
+            let limitesDelMes = {};
+            datosGlobales.presupuestos.forEach(p => {
+                if(p.mes === mesFiltro) limitesDelMes[p.categoria] = parseFloat(p.monto);
+            });
+            
+            // 2. Calcular cuánto se ha gastado en ese mes por categoría
+            let gastadoDelMes = { "Fijo": 0, "Variable": 0, "Ahorro/Destino": 0 };
+            datosGlobales.gastos.forEach(g => {
+                if(String(g.fecha).startsWith(mesFiltro) && gastadoDelMes[g.categoria] !== undefined) {
+                    gastadoDelMes[g.categoria] += parseFloat(g.monto);
+                }
+            });
+
+            // 3. Dibujar las barras
+            let categorias = ["Fijo", "Variable", "Ahorro/Destino"];
+            let html = "";
+            
+            categorias.forEach(cat => {
+                let limite = limitesDelMes[cat] || 0;
+                let gastado = gastadoDelMes[cat];
+                let porcentaje = limite > 0 ? (gastado / limite) * 100 : 0;
+                if(porcentaje > 100) porcentaje = 100;
+                
+                // Color de la barra según cuánto hemos gastado
+                let colorBarra = "bg-green-500";
+                if(porcentaje > 75) colorBarra = "bg-yellow-500";
+                if(porcentaje >= 100) colorBarra = "bg-red-500";
+                
+                html += `
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-end mb-1">
+                        <span class="font-bold text-sm text-gray-700">${cat}</span>
+                        <span class="text-xs text-gray-500 font-bold">${gastado.toFixed(2)} / ${limite > 0 ? limite.toFixed(2) : '--'} Bs</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 mb-1 overflow-hidden">
+                        <div class="${colorBarra} h-3 rounded-full progress-bar" style="width: ${porcentaje}%"></div>
+                    </div>
+                    <p class="text-[10px] text-gray-400 text-right">${limite > 0 ? (100 - (gastado/limite)*100).toFixed(0) + '% disponible' : 'Sin límite fijado'}</p>
+                </div>`;
+            });
+            
+            contenedor.innerHTML = html;
         }
 
         if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js')); }
