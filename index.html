@@ -121,7 +121,6 @@
     <!-- 4. ESTADO -->
     <div id="seccion-resumen" class="seccion-app hidden max-w-md mx-auto p-4 space-y-4">
         
-        <!-- Tarjeta Liquidez Disponible -->
         <div class="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl shadow-lg p-5">
             <div class="flex justify-between items-center mb-3">
                 <div>
@@ -153,7 +152,6 @@
             </div>
         </div>
         
-        <!-- NUEVA TARJETA: Bolsillos de Ahorro Acumulados -->
         <div class="bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm p-5">
             <div class="flex items-center mb-3">
                 <span class="material-symbols-outlined mr-2 text-indigo-700">savings</span>
@@ -167,7 +165,6 @@
             </div>
         </div>
 
-        <!-- Tarjeta Deudas -->
         <div class="bg-white border border-red-200 rounded-xl shadow-sm p-5">
             <h2 class="text-red-700 font-bold flex items-center mb-3"><span class="material-symbols-outlined mr-2">warning</span> Salarios Pendientes</h2>
             <div id="lista-deudas" class="text-sm text-gray-700"></div>
@@ -218,7 +215,7 @@
     </div>
 
     <script>
-        const urlApi = "https://script.google.com/macros/s/AKfycbz473eKT8UghEfzOLjh6DTTZ8BIruXNwkBsyCv-YB7jVceXkvrpwWBSLGT9mWdskQyIww/exec"; // <--- PEGA TU URL EXACTA
+        const urlApi = "https://script.google.com/macros/s/AKfycbz473eKT8UghEfzOLjh6DTTZ8BIruXNwkBsyCv-YB7jVceXkvrpwWBSLGT9mWdskQyIww/exec"; // <--- PEGA TU URL EXACTA AQUI
         const SUELDO_BASE = 3351.06;
         let datosGlobales = { sueldos: [], gastos: [], presupuestos: [] };
         let modoPrivado = true;
@@ -324,7 +321,7 @@
 
         function procesarSaldosYDeudas() {
             let saldos = { "BNB": 0, "BMSC": 0, "Billetera": 0, "Binance": 0, "Wallbit": 0, "Takenos": 0, "Uglycash": 0 };
-            let bolsillos = {}; // Para el fondo de Papás y Ayuda
+            let bolsillos = {}; 
 
             datosGlobales.sueldos.forEach(s => { if(s.monto) saldos["BNB"] += parseFloat(s.monto); });
             
@@ -340,9 +337,7 @@
                 } else if(g.categoria === "Ingreso Extra") {
                     if(saldos[g.cuenta] !== undefined) saldos[g.cuenta] += mSale;
                 } else if(g.categoria === "Ahorro/Destino") {
-                    // Se resta de la liquidez disponible...
                     if(saldos[g.cuenta] !== undefined) saldos[g.cuenta] -= mSale;
-                    // ...y se suma al bolsillo virtual
                     let sub = g.subcategoria.trim() || "Otros";
                     if(!bolsillos[sub]) bolsillos[sub] = 0;
                     bolsillos[sub] += mSale;
@@ -357,7 +352,6 @@
             let totalUSD = (saldos["Binance"] || 0) + (saldos["Wallbit"] || 0) + (saldos["Takenos"] || 0) + (saldos["Uglycash"] || 0);
             document.getElementById('saldo-usd').innerText = totalUSD.toFixed(2) + " $";
 
-            // Renderizar Bolsillos
             let htmlBolsillos = "";
             for (let [nombre, cantidad] of Object.entries(bolsillos)) {
                 htmlBolsillos += `<p class="flex justify-between border-b border-indigo-100 pb-2 mt-2 text-indigo-900"><span>Fondo: <b>${nombre}</b></span> <span class="font-bold saldo-valor ${modoPrivado ? 'blur-md opacity-50 select-none' : ''}">${cantidad.toFixed(2)} Bs</span></p>`;
@@ -413,9 +407,15 @@
                 else if (g.categoria === "Ahorro/Destino") { icono = "savings"; color = "text-indigo-500"; }
                 else if (g.categoria === "Ingreso Extra") { icono = "payments"; color = "text-green-500"; signo = "+"; }
 
-                // Formato de Fecha DD/MM/YYYY
-                let f = g.fecha.split('-');
-                let fechaFormateada = `${f[2]}/${f[1]}/${f[0]}`;
+                // --- SOLUCIÓN DEL ERROR DE FORMATO DE FECHA ---
+                let fechaLimpia = String(g.fecha).substring(0, 10); // Aislar solo el YYYY-MM-DD
+                let f = fechaLimpia.split('-');
+                let fechaFormateada = "";
+                if(f.length === 3) {
+                    fechaFormateada = `${f[2]}/${f[1]}/${f[0]}`; // DD/MM/YYYY
+                } else {
+                    fechaFormateada = g.fecha; // Respaldo de seguridad
+                }
 
                 html += `
                 <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100 flex items-center justify-between">
@@ -443,7 +443,8 @@
             
             let gastadoDelMes = { "Fijo": 0, "Variable": 0, "Ahorro/Destino": 0 };
             datosGlobales.gastos.forEach(g => {
-                if(String(g.fecha).startsWith(mesFiltro) && (g.categoria === "Fijo" || g.categoria === "Variable" || g.categoria === "Ahorro/Destino")) {
+                let fechaLimpia = String(g.fecha).substring(0, 7); // YYYY-MM
+                if(fechaLimpia === mesFiltro && (g.categoria === "Fijo" || g.categoria === "Variable" || g.categoria === "Ahorro/Destino")) {
                     gastadoDelMes[g.categoria] += parseFloat(g.monto);
                 }
             });
@@ -455,7 +456,6 @@
                 let porcentaje = limite > 0 ? (gastado / limite) * 100 : 0;
                 if(porcentaje > 100) porcentaje = 100;
                 
-                // Color Lógica: Si es Ahorro, verde es bueno. Si es Gasto, rojo es malo.
                 let colorBarra = "bg-blue-500";
                 if(cat === "Ahorro/Destino") {
                     colorBarra = porcentaje >= 100 ? "bg-green-500" : "bg-indigo-400";
