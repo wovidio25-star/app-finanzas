@@ -41,28 +41,32 @@
                     <option value="Imprevisto">Imprevisto</option>
                     <option value="Ahorro/Destino" class="font-bold text-indigo-600">Ahorro / Ayuda (Bolsillo)</option>
                     <option value="Traspaso" class="font-bold text-blue-600">Traspaso / Cambio Divisa</option>
+                    <option value="Inversion" class="font-bold text-emerald-600">Inversión (Compra de Activo)</option>
+                    <option value="Ajuste Mercado" class="font-bold text-emerald-400">Ajuste de Mercado (+ / -)</option>
                 </select>
                 
                 <div class="flex items-center space-x-2">
-                    <input type="number" step="0.01" id="g-monto" placeholder="Monto (Sale)" required class="w-full rounded-md border-gray-300 p-2 border focus:ring-blue-500">
+                    <input type="number" step="0.01" id="g-monto" placeholder="Monto" required class="w-full rounded-md border-gray-300 p-2 border focus:ring-blue-500">
                 </div>
 
                 <div id="contenedor-subcategoria">
-                    <input type="text" id="g-subcategoria" placeholder="Detalle (Ej: Papás, Gym...)" required class="w-full rounded-md border-gray-300 p-2 border focus:ring-blue-500">
-                    <p id="hint-ahorro" class="text-[10px] text-indigo-500 hidden mt-1">Usa siempre el mismo nombre (Ej: "Papás") para agrupar el fondo.</p>
+                    <input type="text" id="g-subcategoria" placeholder="Detalle (Ej: Papás, Gym, VOO...)" required class="w-full rounded-md border-gray-300 p-2 border focus:ring-blue-500">
+                    <p id="hint-ahorro" class="text-[10px] text-indigo-500 hidden mt-1">Usa siempre el mismo nombre para agrupar el fondo.</p>
                 </div>
                 
-                <div id="label-cuenta" class="text-xs text-gray-500 font-bold mb-[-10px]">Cuenta afectada (Moneda Origen):</div>
-                <select id="g-cuenta" required class="w-full rounded-md border-gray-300 p-2 border focus:ring-blue-500">
-                    <option value="">Cuenta...</option>
-                    <option value="BNB">BNB (Bs)</option>
-                    <option value="BMSC">BMSC (Bs)</option>
-                    <option value="Billetera">Billetera (Bs)</option>
-                    <option value="Binance">Binance (USD)</option>
-                    <option value="Wallbit">Wallbit (USD)</option>
-                    <option value="Takenos">Takenos (USD)</option>
-                    <option value="Uglycash">Uglycash (USD)</option>
-                </select>
+                <div id="contenedor-cuenta">
+                    <div id="label-cuenta" class="text-xs text-gray-500 font-bold mb-1">Cuenta afectada (Moneda Origen):</div>
+                    <select id="g-cuenta" required class="w-full rounded-md border-gray-300 p-2 border focus:ring-blue-500">
+                        <option value="">Cuenta...</option>
+                        <option value="BNB">BNB (Bs)</option>
+                        <option value="BMSC">BMSC (Bs)</option>
+                        <option value="Billetera">Billetera (Bs)</option>
+                        <option value="Binance">Binance (USD)</option>
+                        <option value="Wallbit">Wallbit (USD)</option>
+                        <option value="Takenos">Takenos (USD)</option>
+                        <option value="Uglycash">Uglycash (USD)</option>
+                    </select>
+                </div>
                 
                 <div id="contenedor-destino" class="hidden bg-blue-50 p-3 rounded-md border border-blue-200 space-y-3">
                     <div>
@@ -90,20 +94,17 @@
         </div>
     </div>
 
-    <!-- 2. HISTORIAL MEJORADO -->
+    <!-- 2. HISTORIAL -->
     <div id="seccion-historial" class="seccion-app hidden max-w-md mx-auto p-4">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Historial y Resumen</h2>
-        
         <div class="flex space-x-2 mb-4">
             <input type="month" id="filtro-mes-historial" class="w-1/2 rounded-md border-gray-300 p-2 border shadow-sm text-sm" onchange="renderizarHistorial()">
             <select id="filtro-tipo-historial" class="w-1/2 rounded-md border-gray-300 p-2 border shadow-sm text-sm" onchange="renderizarHistorial()">
                 <option value="todo">Todos</option>
-                <option value="ingresos">Solo Ingresos</option>
-                <option value="gastos">Solo Gastos</option>
+                <option value="ingresos">Ingresos</option>
+                <option value="gastos">Gastos</option>
             </select>
         </div>
-
-        <!-- Tarjeta de Sumatoria Mensual -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4 flex justify-between items-center">
             <div>
                 <p class="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Total Ingresos</p>
@@ -114,7 +115,6 @@
                 <p id="historial-total-gastos" class="font-bold text-red-600 text-lg saldo-valor blur-md opacity-50 select-none">0.00</p>
             </div>
         </div>
-
         <div id="contenedor-lista-historial" class="space-y-3">
             <p class="text-gray-500 text-center text-sm italic mt-10">Sincroniza para ver datos...</p>
         </div>
@@ -139,14 +139,15 @@
         </div>
     </div>
 
-    <!-- 4. ESTADO -->
+    <!-- 4. ESTADO FINANCIERO -->
     <div id="seccion-resumen" class="seccion-app hidden max-w-md mx-auto p-4 space-y-4">
         
+        <!-- Tarjeta Liquidez -->
         <div class="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl shadow-lg p-5">
             <div class="flex justify-between items-center mb-3">
                 <div>
                     <h2 class="text-xs uppercase tracking-wider font-semibold opacity-80">Liquidez Disponible</h2>
-                    <p class="text-[9px] opacity-60">No incluye fondos reservados</p>
+                    <p class="text-[9px] opacity-60">Dinero en efectivo o cuentas</p>
                 </div>
                 <button onclick="togglePrivacidad()" class="text-gray-300 hover:text-white transition">
                     <span id="icono-privacidad" class="material-symbols-outlined text-xl">visibility</span>
@@ -173,17 +174,37 @@
             </div>
         </div>
         
+        <!-- Tarjeta Inversiones -->
+        <div class="bg-gradient-to-r from-emerald-800 to-emerald-900 text-white rounded-xl shadow-lg p-5">
+            <div class="flex items-center mb-3">
+                <span class="material-symbols-outlined mr-2">trending_up</span>
+                <div>
+                    <h2 class="text-xs uppercase tracking-wider font-semibold opacity-80">Portafolio de Inversiones</h2>
+                    <p class="text-[9px] opacity-60">Activos en bolsa (USD)</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="bg-white/10 p-2 rounded-lg">
+                    <span class="opacity-80 text-xs">Capital Invertido</span>
+                    <p id="inv-capital" class="font-bold text-lg saldo-valor blur-md opacity-50 select-none">0.00 $</p>
+                </div>
+                <div class="bg-white/10 p-2 rounded-lg">
+                    <span class="opacity-80 text-xs">Valor Actual</span>
+                    <p id="inv-actual" class="font-bold text-lg text-emerald-300 saldo-valor blur-md opacity-50 select-none">0.00 $</p>
+                </div>
+            </div>
+            <p id="inv-rendimiento" class="text-xs mt-3 text-right font-bold text-emerald-300">Rendimiento: 0.00%</p>
+        </div>
+        
+        <!-- Bolsillos y Deudas -->
         <div class="bg-indigo-50 border border-indigo-200 rounded-xl shadow-sm p-5">
             <div class="flex items-center mb-3">
                 <span class="material-symbols-outlined mr-2 text-indigo-700">savings</span>
                 <div>
                     <h2 class="text-indigo-800 font-bold">Fondos Reservados</h2>
-                    <p class="text-[10px] text-indigo-600 leading-tight">Dinero acumulado históricamente para tus metas.</p>
                 </div>
             </div>
-            <div id="lista-bolsillos" class="text-sm text-gray-700">
-                <p class="text-gray-500 italic text-center">Sincroniza arriba...</p>
-            </div>
+            <div id="lista-bolsillos" class="text-sm text-gray-700"></div>
         </div>
 
         <div class="bg-white border border-red-200 rounded-xl shadow-sm p-5">
@@ -236,7 +257,7 @@
     </div>
 
     <script>
-        const urlApi = "https://script.google.com/macros/s/AKfycbz473eKT8UghEfzOLjh6DTTZ8BIruXNwkBsyCv-YB7jVceXkvrpwWBSLGT9mWdskQyIww/exec"; // <--- PEGA TU URL EXACTA AQUI
+        const urlApi = "https://script.google.com/macros/s/AKfycbz473eKT8UghEfzOLjh6DTTZ8BIruXNwkBsyCv-YB7jVceXkvrpwWBSLGT9mWdskQyIww/exec"; // <--- PEGA TU URL EXACTA
         const SUELDO_BASE = 3351.06;
         let datosGlobales = { sueldos: [], gastos: [], presupuestos: [] };
         let modoPrivado = true;
@@ -270,25 +291,39 @@
         });
 
         document.getElementById('g-categoria').addEventListener('change', e => {
-            const esTraspaso = (e.target.value === "Traspaso");
-            const esIngreso = (e.target.value === "Ingreso Extra");
-            const esAhorro = (e.target.value === "Ahorro/Destino");
+            const val = e.target.value;
+            const esTraspaso = (val === "Traspaso");
+            const esIngreso = (val === "Ingreso Extra");
+            const esAhorro = (val === "Ahorro/Destino");
+            const esAjuste = (val === "Ajuste Mercado");
             
             document.getElementById('contenedor-destino').classList.toggle('hidden', !esTraspaso);
             document.getElementById('hint-ahorro').classList.toggle('hidden', !esAhorro);
             
+            const contCuenta = document.getElementById('contenedor-cuenta');
             const sub = document.getElementById('g-subcategoria');
             
-            if (esTraspaso) { 
-                sub.value = "Traspaso"; sub.parentElement.classList.add('hidden'); 
-                document.getElementById('label-cuenta').innerText = "De dónde sale el dinero:";
-            } else if (esIngreso) {
-                sub.value = "Saldo Inicial / Extra"; sub.parentElement.classList.remove('hidden');
-                document.getElementById('label-cuenta').innerText = "A qué cuenta entra:";
-            } else { 
-                if(sub.value === "Traspaso" || sub.value === "Saldo Inicial / Extra") sub.value = ""; 
-                sub.parentElement.classList.remove('hidden'); 
-                document.getElementById('label-cuenta').innerText = "Cuenta afectada:";
+            if(esAjuste) {
+                contCuenta.classList.add('hidden');
+                document.getElementById('g-cuenta').removeAttribute('required');
+                sub.value = "Ajuste de Valor";
+                document.getElementById('g-monto').placeholder = "Ej: 5.20 o -3.15";
+            } else {
+                contCuenta.classList.remove('hidden');
+                document.getElementById('g-cuenta').setAttribute('required', 'true');
+                document.getElementById('g-monto').placeholder = "Monto";
+                
+                if (esTraspaso) { 
+                    sub.value = "Traspaso"; sub.parentElement.classList.add('hidden'); 
+                    document.getElementById('label-cuenta').innerText = "De dónde sale el dinero:";
+                } else if (esIngreso) {
+                    sub.value = "Saldo Inicial / Extra"; sub.parentElement.classList.remove('hidden');
+                    document.getElementById('label-cuenta').innerText = "A qué cuenta entra:";
+                } else { 
+                    if(sub.value === "Traspaso" || sub.value === "Saldo Inicial / Extra" || sub.value === "Ajuste de Valor") sub.value = ""; 
+                    sub.parentElement.classList.remove('hidden'); 
+                    document.getElementById('label-cuenta').innerText = "Cuenta afectada:";
+                }
             }
         });
 
@@ -343,6 +378,8 @@
         function procesarSaldosYDeudas() {
             let saldos = { "BNB": 0, "BMSC": 0, "Billetera": 0, "Binance": 0, "Wallbit": 0, "Takenos": 0, "Uglycash": 0 };
             let bolsillos = {}; 
+            let invCapital = 0;
+            let invAjuste = 0;
 
             datosGlobales.sueldos.forEach(s => { if(s.monto) saldos["BNB"] += parseFloat(s.monto); });
             
@@ -362,6 +399,11 @@
                     let sub = g.subcategoria.trim() || "Otros";
                     if(!bolsillos[sub]) bolsillos[sub] = 0;
                     bolsillos[sub] += mSale;
+                } else if (g.categoria === "Inversion") {
+                    if(saldos[g.cuenta] !== undefined) saldos[g.cuenta] -= mSale;
+                    invCapital += mSale;
+                } else if (g.categoria === "Ajuste Mercado") {
+                    invAjuste += mSale;
                 } else {
                     if(saldos[g.cuenta] !== undefined) saldos[g.cuenta] -= mSale;
                 }
@@ -372,6 +414,17 @@
             document.getElementById('saldo-billetera').innerText = saldos["Billetera"].toFixed(2) + " Bs";
             let totalUSD = (saldos["Binance"] || 0) + (saldos["Wallbit"] || 0) + (saldos["Takenos"] || 0) + (saldos["Uglycash"] || 0);
             document.getElementById('saldo-usd').innerText = totalUSD.toFixed(2) + " $";
+
+            // Portafolio de Inversión
+            let invActual = invCapital + invAjuste;
+            let porcentajeRendimiento = invCapital > 0 ? ((invActual - invCapital) / invCapital) * 100 : 0;
+            document.getElementById('inv-capital').innerText = invCapital.toFixed(2) + " $";
+            document.getElementById('inv-actual').innerText = invActual.toFixed(2) + " $";
+            
+            let colorRend = porcentajeRendimiento >= 0 ? "text-emerald-300" : "text-red-400";
+            let signoRend = porcentajeRendimiento > 0 ? "+" : "";
+            document.getElementById('inv-rendimiento').className = `text-xs mt-3 text-right font-bold ${colorRend}`;
+            document.getElementById('inv-rendimiento').innerText = `Rendimiento: ${signoRend}${porcentajeRendimiento.toFixed(2)}%`;
 
             let htmlBolsillos = "";
             for (let [nombre, cantidad] of Object.entries(bolsillos)) {
@@ -407,13 +460,13 @@
             let tipoFiltro = document.getElementById('filtro-tipo-historial').value;
             let contenedor = document.getElementById('contenedor-lista-historial');
             
-            // 1. Unificar Gastos y Sueldos
             let movimientos = [];
             datosGlobales.gastos.forEach(g => {
                 if(String(g.fecha).startsWith(mesFiltro)) {
                     let tipoMov = "gasto";
-                    if(g.categoria === "Traspaso") tipoMov = "traspaso";
+                    if(g.categoria === "Traspaso" || g.categoria === "Ajuste Mercado") tipoMov = "neutro";
                     if(g.categoria === "Ingreso Extra") tipoMov = "ingreso";
+                    if(g.categoria === "Inversion") tipoMov = "neutro"; // No cuenta como gasto perdido en la suma
                     movimientos.push({ ...g, tipo: tipoMov, fechaStr: g.fecha });
                 }
             });
@@ -428,17 +481,13 @@
                 }
             });
 
-            // 2. Filtrar
             let movimientosFiltrados = movimientos;
             if(tipoFiltro === "gastos") movimientosFiltrados = movimientos.filter(m => m.tipo === "gasto");
             else if(tipoFiltro === "ingresos") movimientosFiltrados = movimientos.filter(m => m.tipo === "ingreso");
 
-            // 3. Ordenar
             movimientosFiltrados.sort((a,b) => new Date(b.fechaStr) - new Date(a.fechaStr));
 
-            // 4. Calcular Sumatorias del mes
-            let totalIngresos = 0;
-            let totalGastos = 0;
+            let totalIngresos = 0, totalGastos = 0;
             movimientos.forEach(m => {
                 let val = parseFloat(m.monto);
                 if(isNaN(val)) return;
@@ -446,12 +495,11 @@
                 if(m.tipo === "gasto") totalGastos += val;
             });
 
-            document.getElementById('historial-total-ingresos').innerText = `+ ${totalIngresos.toFixed(2)} Bs`;
-            document.getElementById('historial-total-gastos').innerText = `- ${totalGastos.toFixed(2)} Bs`;
+            document.getElementById('historial-total-ingresos').innerText = `+ ${totalIngresos.toFixed(2)}`;
+            document.getElementById('historial-total-gastos').innerText = `- ${totalGastos.toFixed(2)}`;
 
-            // 5. Renderizar
             if(movimientosFiltrados.length === 0) { 
-                contenedor.innerHTML = "<p class='text-center text-gray-500 mt-6'>No hay movimientos para este filtro.</p>"; 
+                contenedor.innerHTML = "<p class='text-center text-gray-500 mt-6'>No hay movimientos.</p>"; 
                 return; 
             }
             
@@ -472,6 +520,12 @@
                 }
                 else if (g.categoria === "Ahorro/Destino") { icono = "savings"; color = "text-indigo-500"; }
                 else if (g.tipo === "ingreso") { icono = "payments"; color = "text-green-500"; signo = "+"; }
+                else if (g.categoria === "Inversion") { icono = "trending_up"; color = "text-emerald-500"; signo = ""; detalle = `Inversión desde ${g.cuenta}`; }
+                else if (g.categoria === "Ajuste Mercado") { 
+                    icono = "show_chart"; color = parseFloat(g.monto) >= 0 ? "text-emerald-400" : "text-red-400"; 
+                    signo = parseFloat(g.monto) >= 0 ? "+" : ""; 
+                    detalle = "Fluctuación del portafolio"; 
+                }
 
                 let fechaLimpia = String(g.fechaStr).substring(0, 10);
                 let f = fechaLimpia.split('-');
